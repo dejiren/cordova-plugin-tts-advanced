@@ -20,6 +20,28 @@
 - (void)pluginInitialize {
     synthesizer = [AVSpeechSynthesizer new];
     synthesizer.delegate = self;
+    queue = 0;
+}
+
+- (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didStartSpeechUtterance:(AVSpeechUtterance *)utterance {
+    if (queue == 0) {
+        AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+        [audioSession setCategory:AVAudioSessionCategoryAmbient
+                      withOptions:audioSession.categoryOptions | AVAudioSessionCategoryOptionDuckOthers
+                            error:nil];
+        [audioSession setActive:YES withOptions:0 error:nil];
+    }
+    queue++;
+}
+- (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didCancelSpeechUtterance:(AVSpeechUtterance *)utterance {
+    queue = MAX(queue - 1, 0);
+    if (queue == 0) {
+        AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+        [audioSession setCategory:AVAudioSessionCategoryAmbient
+                      withOptions:audioSession.categoryOptions & ~AVAudioSessionCategoryOptionDuckOthers
+                            error:nil];
+        [audioSession setActive:YES withOptions: 0 error:nil];
+    }
 }
 
 - (void)speechSynthesizer:(AVSpeechSynthesizer*)synthesizer didFinishSpeechUtterance:(AVSpeechUtterance*)utterance {
@@ -32,13 +54,14 @@
         callbackId = nil;
     }
     
-    // [[AVAudioSession sharedInstance] setActive:NO withOptions:0 error:nil];
-    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-    [audioSession setCategory:audioSession.category
-                         mode:AVAudioSessionModeSpokenAudio
-                      options:(audioSession.categoryOptions ^ AVAudioSessionCategoryOptionDuckOthers)
-                        error:nil];
-    // [[AVAudioSession sharedInstance] setActive:YES withOptions: 0 error:nil];
+    queue = MAX(queue - 1, 0);
+    if (queue <= 0) {
+        AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+        [audioSession setCategory:AVAudioSessionCategoryAmbient
+                      withOptions:audioSession.categoryOptions & ~AVAudioSessionCategoryOptionDuckOthers
+                            error:nil];
+        [audioSession setActive:YES withOptions: 0 error:nil];
+    }
 }
 
 - (void)speak:(CDVInvokedUrlCommand*)command {
@@ -47,12 +70,6 @@
     }
 
     callbackId = command.callbackId;
-    //[[AVAudioSession sharedInstance] setActive:NO withOptions:0 error:nil];
-    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-    [audioSession setCategory:audioSession.category
-                         mode:AVAudioSessionModeSpokenAudio
-                      options:audioSession.categoryOptions | AVAudioSessionCategoryOptionDuckOthers
-                        error:nil];
     NSDictionary* options = [command.arguments objectAtIndex:0];
 
     NSString* text = [options objectForKey:@"text"];

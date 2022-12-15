@@ -15,6 +15,7 @@
     AVSpeechSynthesizer* synthesizer;
     NSString* lastCallbackId;
     NSString* callbackId;
+    int queue;
 }
 
 - (void)speak:(CDVInvokedUrlCommand*)command;

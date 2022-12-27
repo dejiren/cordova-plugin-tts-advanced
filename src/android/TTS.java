@@ -252,7 +252,13 @@ public class TTS extends CordovaPlugin implements OnInitListener {
         }
         if (voice == null) {
             String[] localeArgs = locale.split("-");
-            tts.setLanguage(new Locale(localeArgs[0], localeArgs[1]));
+            if (localeArgs.length == 1) {
+                tts.setLanguage(new Locale(localeArgs[0]));
+            } else if (localeArgs.length == 2) {
+                tts.setLanguage(new Locale(localeArgs[0], localeArgs[1]));
+            } else if (localeArgs.length >= 3) {
+                tts.setLanguage(new Locale(localeArgs[0], localeArgs[1], localeArgs[2]));
+            }
             for (Voice tmpVoice : voices) {
                 if (tmpVoice.getName().toLowerCase().contains(locale.toLowerCase())) {
                     Log.v("TTS", "Found Voice for locale: " + tmpVoice.getName());

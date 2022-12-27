@@ -84,6 +84,8 @@
     if (!rate) {
         rate = AVSpeechUtteranceDefaultSpeechRate;
         NSLog(@"TTS: No rate set, so we're using OS default: '%lf'", (double)rate);
+    } else {
+        rate = rate * AVSpeechUtteranceDefaultSpeechRate;
     }
     if (!pitch) {
         pitch = 1.0;

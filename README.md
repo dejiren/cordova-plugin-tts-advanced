@@ -68,7 +68,7 @@ declare namespace TTS {
         identifier: string;
         /** voice identifier (iOS / Android) from getVoices */
         locale?: string;
-        /** speed rate, 0 ~ 1 */
+        /** speed rate, 0 ~ 2 (default:1.0) */
         rate?: number;
         /** pitch, 0 ~ 1 */
         pitch?: number;

@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.media.AudioManager;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
@@ -231,6 +232,17 @@ public class TTS extends CordovaPlugin implements OnInitListener {
             return;
         }
 
+        // If the device is in vibrate or mute mode, do not speak.
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        switch (audioManager.getRingerMode()) {
+            case AudioManager.RINGER_MODE_NORMAL:
+                break;
+            case AudioManager.RINGER_MODE_SILENT:
+            case AudioManager.RINGER_MODE_VIBRATE:
+                Log.v("TTS", "Skip speech in vibration or mute mode");
+                return;
+        }
+        
         HashMap<String, String> ttsParams = new HashMap<String, String>();
         ttsParams.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, callbackContext.getCallbackId());
         Set<Voice> voices = tts.getVoices();
